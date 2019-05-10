@@ -3,3 +3,8 @@ cmake-build-debug/*
 
 data
 data/*
+
+src/include/rapidjson
+src/include/rapidjson/*
+src/include/tinyxml
+src/include/tinyxml/*
