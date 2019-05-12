@@ -5,10 +5,18 @@ using namespace std;
 
 int main() {
     Extractor Extractor;
-    vector<pair<string, string>> texts = Extractor.load();
+    vector<vector<vector<string>>> sentences = Extractor.LoadXml("UKWAC-1.xml");
 
-    for (auto &text : texts) {
-        cout << text.first << "\t" << text.second << endl;
+    int count = 0;
+    for (auto &sentence : sentences) {
+        count++;
+        cout << count << " ";
+        for (auto &word : sentence) {
+            if (!word.empty()) {
+                cout << word[0] << "/" << word[1] << " ";
+            }
+        }
+        cout << endl;
     }
 
     return 0;

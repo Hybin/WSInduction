@@ -1,6 +1,8 @@
 //
 // Created by Hybin on 2019/5/10.
 //
+// Read the values from config.json
+//
 
 #ifndef WSINDUCTION_CONFIG_H
 #define WSINDUCTION_CONFIG_H
