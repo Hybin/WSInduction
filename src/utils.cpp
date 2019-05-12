@@ -2,7 +2,7 @@
 // Created by Hybin on 2019-05-12.
 //
 
-#include "utils.h"
+#include "include/utils.h"
 
 using namespace std;
 
@@ -63,4 +63,29 @@ vector<string> utils::split(const string &str, const string &delimiter)
     }
 
     return result;
+}
+
+Satz utils::match(const Lexikon &keyword, const Satz &sentence)
+{
+    Satz data;
+    for (auto &word : sentence) {
+        if (!word.empty()) {
+            if (word[1] == keyword.second && word[2] == keyword.first) {
+                data = sentence;
+                break;
+            }
+        }
+    }
+    return data;
+}
+
+bool utils::check(const map<string, int> &status)
+{
+    for (auto &s : status) {
+        if (s.second < 20000) {
+            return false;
+        }
+    }
+
+    return true;
 }

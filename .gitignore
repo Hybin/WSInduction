@@ -11,3 +11,5 @@ src/include/tinyxml/*
 
 .idea
 .idea/*
+
+.DS_Store
