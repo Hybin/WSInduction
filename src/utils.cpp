@@ -5,6 +5,7 @@
 #include "include/utils.h"
 
 using namespace std;
+using namespace tinyxml2;
 
 string utils::CheckPos(const string &pos)
 {
@@ -76,6 +77,7 @@ Satz utils::match(const Lexikon &keyword, const Satz &sentence)
             }
         }
     }
+
     return data;
 }
 
@@ -88,4 +90,22 @@ bool utils::check(const map<string, int> &status)
     }
 
     return true;
+}
+
+string utils::join(const vector<string> &entry)
+{
+    string result;
+
+    for (auto &e : entry) {
+        result += e + '\t';
+    }
+
+    // Trim the string
+    result.erase(result.find_last_not_of('\t') + 1);
+    return result;
+}
+
+void utils::clear()
+{
+    system("cls");
 }

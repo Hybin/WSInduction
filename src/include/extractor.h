@@ -8,7 +8,6 @@
 #include <utility>
 #include <fstream>
 #include <boost/filesystem.hpp>
-#include "tinyxml/tinyxml2.h"
 #include "config.h"
 #include "utils.h"
 
@@ -27,19 +26,22 @@ public:
     Stichworte LoadTargets();
 
     // 加载训练数据
-    std::map<std::string, Satze> LoadXml(const std::string &file);
+    bool LoadXml(const std::string &file);
 
     // 分批读取训练数据
     static Satze ReadXml(tinyxml2::XMLElement * root);
 
     // 搜集训练数据
-    void search(const Satze &sentences, std::map<std::string, Satze> dataset);
+    std::map<std::string, Satze> search(const Satze &sentences);
 
     // 保存训练数据
-    void store(std::map<std::string, Satze> dataset);
+    void store(std::map<std::string, Satze> &dataset);
 
     // 构造训练数据
     void build();
+
+    // 打印训练数据搜集状态
+    void log();
 private:
     // 读取配置文件
     Config config;

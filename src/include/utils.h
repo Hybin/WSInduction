@@ -9,6 +9,9 @@
 #include <algorithm>
 #include <vector>
 #include <map>
+#include <iostream>
+#include <cstdlib>
+#include "tinyxml/tinyxml2.h"
 
 using Lexikon = std::pair<std::string, std::string>;
 using Satz = std::vector<std::vector<std::string>>;
@@ -28,6 +31,12 @@ namespace utils {
 
     // Check if the dataset is ready
     bool check(const std::map<std::string, int> &status);
+
+    // Merge the vector<string> into string
+    std::string join(const std::vector<std::string> &entry);
+
+    // Clear the console
+    void clear();
 }
 
 #endif //WSINDUCTION_UTILS_H

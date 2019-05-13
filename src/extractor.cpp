@@ -3,6 +3,7 @@
 //
 
 #include "include/extractor.h"
+#include <stdlib.h>
 
 
 using namespace std;
@@ -52,7 +53,7 @@ Satze Extractor::ReadXml(XMLElement *root)
 
     for (XMLElement * e = root->FirstChildElement("s"); e != nullptr; e = e->NextSiblingElement("s")) {
         vector<string> words;               // Each "word  pos  lemma" in <s></s>
-        satz sentence;    // Sentence in <s></s>
+        Satz sentence;    // Sentence in <s></s>
 
         const char* text = e->GetText();
 
@@ -63,7 +64,7 @@ Satze Extractor::ReadXml(XMLElement *root)
             lexicon = utils::split(word, "\t");  // For pos transformation
 
             // Transform POS into the standard type
-            if (!lexicon.empty()) {
+            if (!lexicon.empty() && lexicon.size() == 3) {
                 lexicon[1] = utils::transform(lexicon[1]);
             }
 
@@ -76,7 +77,7 @@ Satze Extractor::ReadXml(XMLElement *root)
     return sentences;
 }
 
-map<string, Satze> Extractor::LoadXml(const string &file)
+bool Extractor::LoadXml(const string &file)
 {
     Satze sentences;
 
@@ -89,28 +90,44 @@ map<string, Satze> Extractor::LoadXml(const string &file)
 
     XMLElement * root = this->document.FirstChildElement("text");
 
-    // TODO: Gather the training data
-    sentences = this->ReadXml(root);
-
     map<string, Satze> dataset;
+
+    bool complete = utils::check(this->collect_status);
 
     while (root != nullptr) {
         // Check if the dataset is ready
-        if (utils::check(this->collect_status)) {
+        if (complete) {
             break;
         }
 
-        search(sentences, dataset);
+        // Gather the training data
+        sentences = this->ReadXml(root);
+
+        dataset = search(sentences);
+
+        for (auto &item : dataset) {
+            if (this->collect_status[item.first] < 20000) {
+                this->collect_status[item.first] += item.second.size();
+            }
+        }
+
+        // Store the data
+        this->store(dataset);
+        this->log();
+
+        // Update the complete status
+        complete = utils::check(this->collect_status);
 
         // Update the root node
         root = root->NextSiblingElement("text");
     }
 
-    return dataset;
+    return complete;
 }
 
-void Extractor::search(const Satze &sentences, map<string, Satze> dataset)
+map<string, Satze> Extractor::search(const Satze &sentences)
 {
+    map<string, Satze> dataset;
     for (auto &keyword : this->keywords) {
         for (auto &sentence : sentences) {
             Satz data = utils::match(keyword, sentence);
@@ -118,19 +135,125 @@ void Extractor::search(const Satze &sentences, map<string, Satze> dataset)
             if (!data.empty()) {
                 if (dataset.find(keyword.first) == dataset.end()) {
                     dataset[keyword.first] = {};
-                } else {
-                    dataset[keyword.first].emplace_back(data);
                 }
+                dataset[keyword.first].emplace_back(data);
             }
         }
     }
+    return dataset;
 }
 
-void Extractor::store(map<string, Satze> dataset)
+void Extractor::store(map<string, Satze> &dataset)
 {
-    std::ofstream out(this->config.get("train_data"), ios_base::out|ios_base::ate);
+    XMLDocument doc;
+    path directory(this->config.get("train_data"));
 
+    for (auto &item : dataset) {
+        if (this->collect_status[item.first] >= 20000) {
+            continue;
+        }
+        // Build the full path
+        path xml(item.first + ".xml"), path = directory / xml;
 
+        // Check if the .xml exists
+        if (!exists(path)) {
+            std::ofstream out(path.c_str());
+            out.close();
+        }
+
+        // Load the .xml file
+        XMLError success = doc.LoadFile(path.c_str());
+
+        XMLElement* root;
+
+        if (success != XML_SUCCESS) {
+            const char* declaration = R"(<?xml version="1.0" encoding="UTF-8"?>)";
+
+            doc.Parse(declaration);
+
+            // Insert the root node
+            root = doc.NewElement("instances");
+            doc.InsertEndChild(root);
+        } else {
+            root = doc.RootElement();
+        }
+
+        for (auto &sentence : item.second) {
+            XMLElement* instance = doc.NewElement("instance");
+            instance->SetAttribute("lemma", item.first.c_str());
+
+            // Insert the text of sentence
+            string content;
+
+            for (auto &word : sentence) {
+                string piece = utils::join(word);
+                content += piece + '\n';
+            }
+
+            instance->InsertEndChild(doc.NewText(content.c_str()));
+            root->InsertEndChild(instance);
+        }
+
+        doc.SaveFile(path.c_str());
+    }
+
+    /*
+    // Read the content first
+    XMLDocument in;
+    path path(this->config.get("train_data"));
+
+    XMLError success = in.LoadFile(path.c_str());
+
+    if (success != XML_SUCCESS) {    // Create a new .xml file
+        const char* declaration = R"(<?xml version="1.0" encoding="UTF-8"?>)";
+
+        XMLDocument doc;
+        doc.Parse(declaration);
+
+        // Insert the root node
+        XMLElement* root = doc.NewElement("instances");
+        doc.InsertEndChild(root);
+
+        for (auto &item : dataset) {
+            for (auto &sentence : item.second) {
+                XMLElement* instance = doc.NewElement("instance");
+                instance->SetAttribute("lemma", item.first.c_str());
+
+                // Insert the text of sentence
+                string content;
+
+                for (auto &word : sentence) {
+                    string piece = utils::join(word);
+                    content += piece + '\n';
+                }
+
+                instance->InsertEndChild(doc.NewText(content.c_str()));
+                root->InsertEndChild(instance);
+            }
+        }
+
+        doc.SaveFile(path.c_str());
+    } else {
+        XMLElement * root = in.RootElement();
+        for (auto &item : dataset) {
+            for (auto &sentence : item.second) {
+                XMLElement* instance = in.NewElement("instance");
+                instance->SetAttribute("lemma", item.first.c_str());
+
+                // Insert the text of sentence
+                string content;
+
+                for (auto &word : sentence) {
+                    string piece = utils::join(word);
+                    content += piece + '\n';
+                }
+
+                instance->InsertEndChild(in.NewText(content.c_str()));
+                root->InsertEndChild(instance);
+            }
+        }
+        in.SaveFile(path.c_str());
+    }*/
 }
 
 void Extractor::build()
@@ -151,24 +274,21 @@ void Extractor::build()
         }
     }
 
-    map<string, Satze> dataset;
-
     bool complete = utils::check(this->collect_status);   // If the dataset has been ready, to be true.
 
     for (auto &file : files) {
         if (complete) {
             break;
         } else {
-            dataset = this->LoadXml(file);
-
-            for (auto &item : dataset) {
-                this->collect_status[item.first] += item.second.size();
-            }
-
-            // Update the complete status
-            complete = utils::check(this->collect_status);
-
-            // TODO:Store the data
+            complete = this->LoadXml(file);
         }
+    }
+}
+
+void Extractor::log()
+{
+    cout << "INFO: The status of training data collection." << endl;
+    for (auto &status: this->collect_status) {
+        cout << status.first << ": " << status.second << endl;
     }
 }

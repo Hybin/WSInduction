@@ -1,6 +1,6 @@
 {
   "target_data": "../data/test/contexts/xml-format",
   "source_data": "../data/train/ukWaC",
-  "train_data": "../data/temp/train.data",
-  "test_data": "../data/temp/test.data"
+  "train_data": "../data/temp/train",
+  "test_data": "../data/temp/test"
 }
