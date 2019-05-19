@@ -105,7 +105,37 @@ string utils::join(const vector<string> &entry)
     return result;
 }
 
-void utils::clear()
+vector<int> utils::window(const int &index, const Satz &sentence)
 {
-    system("cls");
+    vector<int> range = {0, 0};
+
+    if (index < 0) {
+        return range;
+    }
+
+    int start = index - 4, end = index + 3;
+
+    if (start >= 0 && end < sentence.size()) {
+        range = {start, end};
+    }
+
+    if (start < 0) {
+        if (end < sentence.size()) {
+            range = {0, end};
+        } else {
+            int e = sentence.size() - 1;
+            range = {0, e};
+        }
+    }
+
+    if (end >= sentence.size()) {
+        int e = sentence.size() - 1;
+        if (start >= 0) {
+            range = {start, e};
+        } else {
+            range = {0, e};
+        }
+    }
+
+    return range;
 }

@@ -35,8 +35,8 @@ namespace utils {
     // Merge the vector<string> into string
     std::string join(const std::vector<std::string> &entry);
 
-    // Clear the console
-    void clear();
+    // Set the window of context
+    std::vector<int> window(const int &index, const Satz &sentence);
 }
 
 #endif //WSINDUCTION_UTILS_H

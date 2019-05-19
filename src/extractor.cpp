@@ -60,7 +60,7 @@ Satze Extractor::ReadXml(XMLElement *root)
         words = utils::split(text, "\n");   // Get the entry <word, pos, lemma>
 
         for (auto &word : words) {
-            vector<string> temp, lexicon;
+            vector<string> lexicon;
             lexicon = utils::split(word, "\t");  // For pos transformation
 
             // Transform POS into the standard type
@@ -129,16 +129,19 @@ map<string, Satze> Extractor::search(const Satze &sentences)
 {
     map<string, Satze> dataset;
     for (auto &keyword : this->keywords) {
-        for (auto &sentence : sentences) {
-            Satz data = utils::match(keyword, sentence);
+        if (this->collect_status[keyword.first] < 20000) {
+            for (auto &sentence : sentences) {
+                Satz data = utils::match(keyword, sentence);
 
-            if (!data.empty()) {
-                if (dataset.find(keyword.first) == dataset.end()) {
-                    dataset[keyword.first] = {};
+                if (!data.empty()) {
+                    if (dataset.find(keyword.first) == dataset.end()) {
+                        dataset[keyword.first] = {};
+                    }
+                    dataset[keyword.first].emplace_back(data);
                 }
-                dataset[keyword.first].emplace_back(data);
             }
         }
+
     }
     return dataset;
 }
@@ -197,63 +200,7 @@ void Extractor::store(map<string, Satze> &dataset)
         doc.SaveFile(path.c_str());
     }
 
-    /*
-    // Read the content first
-    XMLDocument in;
-    path path(this->config.get("train_data"));
 
-    XMLError success = in.LoadFile(path.c_str());
-
-    if (success != XML_SUCCESS) {    // Create a new .xml file
-        const char* declaration = R"(<?xml version="1.0" encoding="UTF-8"?>)";
-
-        XMLDocument doc;
-        doc.Parse(declaration);
-
-        // Insert the root node
-        XMLElement* root = doc.NewElement("instances");
-        doc.InsertEndChild(root);
-
-        for (auto &item : dataset) {
-            for (auto &sentence : item.second) {
-                XMLElement* instance = doc.NewElement("instance");
-                instance->SetAttribute("lemma", item.first.c_str());
-
-                // Insert the text of sentence
-                string content;
-
-                for (auto &word : sentence) {
-                    string piece = utils::join(word);
-                    content += piece + '\n';
-                }
-
-                instance->InsertEndChild(doc.NewText(content.c_str()));
-                root->InsertEndChild(instance);
-            }
-        }
-
-        doc.SaveFile(path.c_str());
-    } else {
-        XMLElement * root = in.RootElement();
-        for (auto &item : dataset) {
-            for (auto &sentence : item.second) {
-                XMLElement* instance = in.NewElement("instance");
-                instance->SetAttribute("lemma", item.first.c_str());
-
-                // Insert the text of sentence
-                string content;
-
-                for (auto &word : sentence) {
-                    string piece = utils::join(word);
-                    content += piece + '\n';
-                }
-
-                instance->InsertEndChild(in.NewText(content.c_str()));
-                root->InsertEndChild(instance);
-            }
-        }
-        in.SaveFile(path.c_str());
-    }*/
 }
 
 void Extractor::build()

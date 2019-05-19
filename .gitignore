@@ -8,6 +8,8 @@ src/include/rapidjson
 src/include/rapidjson/*
 src/include/tinyxml
 src/include/tinyxml/*
+src/include/fmt
+src/include/fmt/*
 
 .idea
 .idea/*

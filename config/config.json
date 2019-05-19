@@ -2,5 +2,13 @@
   "target_data": "../data/test/contexts/xml-format",
   "source_data": "../data/train/ukWaC",
   "train_data": "../data/temp/train",
-  "test_data": "../data/temp/test"
+  "test_data": "../data/temp/test",
+  "input_data": "../data/temp/input",
+  "output_data": "../data/temp/output",
+  "sub_data": "../data/temp/substitute",
+  "vocabulary": "../data/vocabularies",
+  "pair_data": "../data/temp/pairs/{}.pair",
+  "extract": "train_data",
+  "read": "output_data",
+  "convert": "sub_data"
 }
