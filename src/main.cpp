@@ -17,10 +17,13 @@ int main() {
     // Build the input data
     Processor Processor;
 
-    // Processor.extract("trace.n.xml");
-
-    // Processor.read("become.txt.out");
-    Processor.convert("add.sub");
+    /*
+     * Mode:
+     *  - extract: extract the context of target word from .xml file
+     *  - read: get the target word and its substitutes from output file
+     *  - convert: build the instance - substitute pair
+     */
+    Processor.build("convert");
 
     return 0;
 }

@@ -12,16 +12,23 @@ Processor::Processor() = default;
 
 void Processor::load(const string &keyword)
 {
+    // Initialize
+    this->vocabulary = {};
+
     path directory(this->config.get("vocabulary")), file(keyword);
     path path = directory / file;
 
     std::ifstream in(path.c_str(), ios_base::in);
 
-    string word;
+    if (!in) {
+        this->vocabulary = {};
+    } else {
+        string word;
 
-    while (getline(in, word)) {
-        if (!word.empty()) {
-            this->vocabulary.push_back(word);
+        while (getline(in, word)) {
+            if (!word.empty()) {
+                this->vocabulary.push_back(word);
+            }
         }
     }
 
@@ -135,7 +142,8 @@ void Processor::build(const string &type)
 }
 
 void Processor::read(const string &file) {
-    string keyword = utils::split(file, ".")[0];
+    vector<string> pieces = utils::split(file, ".");
+    string keyword = pieces[0];
 
     this->load(keyword);
 
@@ -164,6 +172,10 @@ void Processor::read(const string &file) {
         }
     }
 
+    if (pieces.size() > 3) {
+        keyword = pieces[0] + "." + pieces[1];
+    }
+
     string substitute_data = this->config.get("sub_data") + "/" + keyword + ".sub";
 
     std::ofstream out(substitute_data, ios_base::out);
@@ -175,11 +187,14 @@ void Processor::read(const string &file) {
     }
 
     out.close();
+
+    cout << "Target word: " << keyword << " has processed!" << endl;
 }
 
 void Processor::convert(const string &file)
 {
-    string keyword = utils::split(file, ".")[0];
+    vector<string> pieces = utils::split(file, ".");
+    string keyword = pieces[0];
 
     map<string, vector<string>> substitutes;
 
@@ -208,6 +223,10 @@ void Processor::convert(const string &file)
     in.close();
 
     // Store the data
+    if (pieces.size() > 2) {
+        keyword = pieces[0] + "." + pieces[1];
+    }
+    
     std::ofstream out(fmt::format(this->config.get("pair_data"), keyword), ios_base::out);
 
     for (auto &substitute : substitutes) {
@@ -217,4 +236,6 @@ void Processor::convert(const string &file)
     }
 
     out.close();
+
+    cout << "Target word: " << keyword << " has processed!" << endl;
 }

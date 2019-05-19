@@ -25,7 +25,7 @@ set(Source_Code
         src/include/utils.h
         src/processor.cpp
         src/include/processor.h
-)
+        src/cluster.cpp src/include/cluster.h)
 
 add_executable(WSInduction ${Libraries} ${Source_Code})
 
