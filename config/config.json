@@ -2,13 +2,17 @@
   "target_data": "../data/test/contexts/xml-format",
   "source_data": "../data/train/ukWaC",
   "train_data": "../data/temp/train",
-  "test_data": "../data/temp/test",
   "input_data": "../data/temp/input",
-  "output_data": "../data/temp/output",
+  "output_data": "../data/test-set/output",
   "sub_data": "../data/temp/substitute",
   "vocabulary": "../data/vocabularies",
   "pair_data": "../data/temp/pairs/{}.pair",
+  "test_pair_data": "../data/test-set/pairs/{}.pair",
+  "vectors": "../data/temp/vectors/{}.pair.out",
+  "test_vectors": "../data/test-set/vectors/{}.pair.out",
   "extract": "train_data",
   "read": "output_data",
-  "convert": "sub_data"
+  "convert": "sub_data",
+  "res_path": "../data/result/clusters_{}.txt",
+  "test_input": "../data/test-set/input/{}.txt"
 }

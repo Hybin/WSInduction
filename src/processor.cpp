@@ -7,6 +7,7 @@
 using namespace tinyxml2;
 using namespace boost::filesystem;
 using namespace std;
+using namespace fmt;
 
 Processor::Processor() = default;
 
@@ -212,15 +213,18 @@ void Processor::convert(const string &file)
 
         count++;
 
+        string key = keyword + to_string(count);
+
         for (auto &item : items) {
             vector<string> pair = utils::split(item, " ");
             if (pair[0].length() <= 21) {
-                substitutes[keyword + to_string(count)].push_back(pair[0]);
+                substitutes[key].push_back(pair[0]);
             }
         }
     }
 
     in.close();
+
 
     // Store the data
     if (pieces.size() > 2) {
@@ -238,4 +242,113 @@ void Processor::convert(const string &file)
     out.close();
 
     cout << "Target word: " << keyword << " has processed!" << endl;
+}
+
+void Processor::test()
+{
+    path directory(this->config.get("target_data"));
+
+    vector<string> files;
+
+    // Iterate the directory
+    for (auto item = directory_iterator(directory); item != directory_iterator(); item++)
+    {
+        if (!is_directory(item->path())) {
+            string file =  item->path().filename().string();
+            files.push_back(file);
+        } else {
+            continue;
+        }
+    }
+
+    map<string, vector<string>> instances_ids;
+
+    for (auto &file : files) {
+        vector<string > filename = utils::split(file, ".");
+
+        string keyword = filename[0] + "." + filename[1];
+
+        path xml(file), path = directory / xml;
+
+        this->document.LoadFile(path.c_str());
+
+        XMLElement * root = this->document.RootElement();
+
+        // vector<vector<string>> contexts;
+
+        vector<string> instances;
+
+        for (XMLElement * instance = root->FirstChildElement("instance");
+             instance != nullptr; instance = instance->NextSiblingElement("instance")) {
+            /*
+            const char *text = instance->GetText();
+
+            string sentence;
+            regex pattern(R"([,\."'\(\)!-\?\[\]]*)");
+
+            for (int i = 0; i < strlen(text); ++i) {
+                string character;
+                character.push_back(text[i]);
+                if (regex_match(character, pattern)) {
+                    sentence.push_back(' ');
+                    sentence.push_back(text[i]);
+                    sentence.push_back(' ');
+                } else {
+                    sentence.push_back(text[i]);
+                }
+            }*/
+
+            string id = instance->Attribute("id"), token = instance->Attribute("token");
+
+            instances.push_back(id);
+
+            /* vector<string> temp = utils::split(sentence, " "), words;
+
+            for (auto &item : temp) {
+                if (!item.empty()) {
+                    continue;
+                } else {
+                    words.push_back(item);
+                }
+            }
+
+            int index = -1;
+
+            for (auto &word : words) {
+                regex rule(token + R"([,\."'\(\)]*)");
+
+                if (regex_match(word, rule)) {
+                    index = distance(words.begin(), find(words.begin(), words.end(), word));
+                }
+            }
+
+            vector<int> range = utils::screen(index, words);
+
+            vector<string> context;
+
+            for (int i = range[0]; i < range[1]; ++i) {
+                context.push_back(words[i]);
+            }
+
+            contexts.push_back(context);*/
+        }
+
+        instances_ids[keyword] = instances;
+        /*
+
+        std::ofstream out(format(this->config.get("test_input"), keyword), ios_base::out);
+
+        for (auto &context : contexts) {
+            for (auto &word : context) {
+                out << word << " ";
+            }
+
+            out << endl;
+        }
+
+        out.close();
+         */
+    }
+
+    this->instance_ids = instances_ids;
 }

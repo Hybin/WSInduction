@@ -139,3 +139,49 @@ vector<int> utils::window(const int &index, const Satz &sentence)
 
     return range;
 }
+
+vector<int> utils::screen(const int &index, vector<string> &sentence)
+{
+    vector<int> range = {0, 0};
+
+    if (index < 0) {
+        return range;
+    }
+
+    int start = index - 3, end = index + 4;
+
+    if (start >= 0 && end < sentence.size()) {
+        range = {start, end};
+    }
+
+    if (start < 0) {
+        if (end < sentence.size()) {
+            range = {0, end};
+        } else {
+            int e = sentence.size() - 1;
+            range = {0, e};
+        }
+    }
+
+    if (end >= sentence.size()) {
+        int e = sentence.size() - 1;
+        if (start >= 0) {
+            range = {start, e};
+        } else {
+            range = {0, e};
+        }
+    }
+
+    return range;
+}
+
+float utils::StringToFloat(const string &word)
+{
+    float value;
+
+    stringstream stream(word);
+
+    stream >> value;
+
+    return value;
+}

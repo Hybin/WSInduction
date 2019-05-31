@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 #include "tinyxml/tinyxml2.h"
 
@@ -37,6 +38,12 @@ namespace utils {
 
     // Set the window of context
     std::vector<int> window(const int &index, const Satz &sentence);
+
+    // Set the window of context
+    std::vector<int> screen(const int &index, std::vector<std::string> &sentence);
+
+    // Convert the string into float
+    float StringToFloat(const std::string &word);
 }
 
 #endif //WSINDUCTION_UTILS_H

@@ -8,6 +8,7 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 #include <algorithm>
+#include <regex>
 #include "fmt/format.h"
 #include "utils.h"
 #include "config.h"
@@ -31,12 +32,17 @@ public:
 
     // 转换为低维向量
     void convert(const std::string &file);
+
+    // 提取测试集语境
+    void test();
 private:
     Config config;
 
     tinyxml2::XMLDocument document;
 
     std::vector<std::string> vocabulary;
+
+    std::map<std::string, std::vector<std::string>> instance_ids;
 };
 
 
